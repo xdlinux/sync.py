@@ -1,0 +1,40 @@
+{
+    "version": 1.5,
+    "site": {
+        "url": "https://linux.xidian.edu.cn/mirrors",
+        "logo": "https://linux.xidian.edu.cn/img/xdosc.svg",
+        "logo_darkmode": "https://linux.xidian.edu.cn/img/xdosc.svg",
+        "abbr": "Xidian",
+        "name": "西电开源软件镜像站",
+        "homepage": "https://linux.xidian.edu.cn",
+        "issue": "https://linux.xidian.edu.cn/git/xdlinux/issues",
+        "group": "Telegram: https://t.me/xdosc",
+        "note": "仅面向校内使用"
+    },
+    "mirrors": [],
+    "info": [],
+    "extension": "D",
+    "endpoints": [
+        {
+            "label": "xidian",
+            "public": false,
+            "resolve": "linux.xidian.edu.cn/mirrors",
+            "filter": [
+                "V4",
+                "SSL",
+                "NOSSL"
+            ],
+            "range": [
+                "222.25.128.0/18",
+                "219.245.64.0/18",
+                "219.244.112.0/20",
+                "210.27.0.0/20",
+                "202.117.112.0/20",
+                "115.155.32.0/19",
+                "115.155.0.0/19",
+                "113.200.174.0/24",
+                "113.140.11.0/24"
+            ]
+        }
+    ]
+}
