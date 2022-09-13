@@ -101,22 +101,7 @@ async def loop_tasks():
     # to update status.json when mirrorz.meta.json changes
     update_status_json(mirrors)
 
-
-if os.path.exists('sync.lock'):
-    print('sync.py already running...')
-    exit()
-
-with open('sync.lock', 'w+') as fl:
-    try:
-        fcntl.flock(fl, fcntl.LOCK_EX | fcntl.LOCK_NB)
-    except IOError:
-        print('sync.py already running...')
-        exit()
-
-    try:
-        loop = asyncio.get_event_loop()
-        loop.run_until_complete(loop_tasks())
-        loop.close()
-        fcntl.flock(fl, fcntl.LOCK_UN)
-    finally:
-        os.remove('sync.lock')
+if __name__ == "__main__":
+    loop = asyncio.get_event_loop()
+    loop.run_until_complete(loop_tasks())
+    loop.close()
