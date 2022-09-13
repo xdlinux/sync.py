@@ -39,7 +39,7 @@ async def do_sync(mirror):
         elif state == 'O' and lastsuccess is None:
             lastsuccess = time
     else:
-        log.info(f'syncing {mirror}')
+        log.info(f'syncing {mirror}, command: ' + mirrors[mirror]['command'].format(**general['vars']))
         status['state'] = f'Y{int(datetime.now().timestamp())}'
         if lastsuccess:
             status['state'] += f'O{int(lastsuccess.timestamp())}'
@@ -47,18 +47,17 @@ async def do_sync(mirror):
             f.write(json.dumps(status))
         update_status_json(mirrors)
 
-        proc_output_path = Path('logs', mirror)
-        proc_output = open(proc_output_path, 'w')
-        proc = await asyncio.create_subprocess_shell(
-            cmd=mirrors[mirror]['command'].format(**general['vars']),
-            stderr=asyncio.subprocess.DEVNULL,
-            stdout=proc_output,
-        )
-        try:
-            code = await proc.wait()
-        except KeyboardInterrupt:
-            code = -1
-        proc_output.close()
+        proc_output_path = Path('logs', mirror + '.log')
+        proc_error_path = Path('logs', mirror + '.err')
+        with open(proc_output_path, 'w') as stdout, open(proc_error_path, 'w') as stderr:
+            proc = await asyncio.create_subprocess_shell(
+                cmd=mirrors[mirror]['command'].format(**general['vars']),
+                stderr=stderr, stdout=stdout,
+            )
+            try:
+                code = await proc.wait()
+            except KeyboardInterrupt:
+                code = -1
 
         if code == 0:
             log.info(f'successfully synced {mirror}')
@@ -72,14 +71,16 @@ async def do_sync(mirror):
                 status['state'] += f'O{int(lastsuccess.timestamp())}'
         else:
             message = f'Error Occured Syncing {mirror}.'
-            log.error(f'error syncing {mirror}')
+            log.error(f'error syncing {mirror}, code {code}')
             status['state'] = f'F{int(datetime.now().timestamp())}'
             if lastsuccess:
                 message += f' Last Successful Sync: {lastsuccess.strftime(general["timeformat"])}.'
                 status['state'] += f'O{int(lastsuccess.timestamp())}'
-            shutil.copyfile(proc_output_path, Path('logs', f'{mirror}-{datetime.now().strftime(general["timeformat"])}'))
+            shutil.copyfile(proc_output_path, Path('logs', f'{mirror}.log-{datetime.now().strftime(general["timeformat"])}'))
+            shutil.copyfile(proc_error_path, Path('logs', f'{mirror}.err-{datetime.now().strftime(general["timeformat"])}'))
 
         proc_output_path.unlink()
+        proc_error_path.unlink()
 
         with open(path, 'w') as f:
             f.write(json.dumps(status))
